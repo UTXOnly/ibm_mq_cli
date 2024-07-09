@@ -1,2 +1,0 @@
-[console_scripts]
-ibm-mq-cli = ibm_mq_cli.main:main
