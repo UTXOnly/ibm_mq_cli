@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+ibm_mq_cli/__init__.py
+ibm_mq_cli/main.py
+ibm_mq_cli.egg-info/PKG-INFO
+ibm_mq_cli.egg-info/SOURCES.txt
+ibm_mq_cli.egg-info/dependency_links.txt
+ibm_mq_cli.egg-info/entry_points.txt
+ibm_mq_cli.egg-info/top_level.txt
