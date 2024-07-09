@@ -89,3 +89,67 @@ ibm-mq-cli configure_queue <queue_manager_name> <queue_name> <configuration>
 ibm-mq-cli configure_queue QM1 DEV.QUEUE.1 "MAXDEPTH(5000)"
 ibm-mq-cli configure_queue MyQueueManager MyQueue "MAXMSGL(104857600)"
 ```
+#### Start Queue Manager
+To start a queue manager, use the following command:
+
+```sh
+ibm-mq-cli start_qm <queue_manager_name>
+```
+##### Example:
+
+```sh
+ibm-mq-cli start_qm QM1
+ibm-mq-cli start_qm MyQueueManager
+```
+
+#### Stop Queue Manager
+To stop a queue manager, use the following command:
+```sh
+ibm-mq-cli stop_qm <queue_manager_name>
+```
+##### Example:
+```sh
+ibm-mq-cli stop_qm QM1
+ibm-mq-cli stop_qm MyQueueManager
+```
+
+#### Display Queues
+To display all queues in a specified queue manager, use the following command:
+```sh
+ibm-mq-cli display_queues <queue_manager_name>
+```
+##### Example:
+```sh
+ibm-mq-cli display_queues QM1
+ibm-mq-cli display_queues MyQueueManager
+```
+
+#### Get Queue Permissions
+To get permissions for a user on all queues in a specified queue manager, use the following command:
+```sh
+ibm-mq-cli get_permissions <queue_manager_name> <user>
+```
+##### Example:
+```sh
+ibm-mq-cli get_permissions QM1 myuser
+ibm-mq-cli get_permissions MyQueueManager anotheruser
+```
+**Example Output**
+```sh
+Permissions for queue 'DEV.QUEUE.1':
+Entity ubuntu has the following authorizations for object DEV.QUEUE.1:
+        get
+        browse
+        put
+        inq
+        set
+        crt
+        dlt
+        chg
+        dsp
+        passid
+        passall
+        setid
+        setall
+        clr
+```
