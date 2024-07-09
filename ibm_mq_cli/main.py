@@ -2,6 +2,8 @@ import argparse
 import subprocess
 import os
 import tempfile
+import re
+import sys
 
 def run_command(command):
     """Utility function to run a shell command."""
@@ -64,6 +66,36 @@ def stop_queue_manager(args):
     output = run_mq_command(f"/opt/mqm/bin/endmqm -i {args.name}")
     print(f"Queue manager {args.name} stopped.\n{output}")
 
+def extract_queue_names(output):
+    """Extract queue names from the DISPLAY QUEUE output."""
+    queue_name_pattern = re.compile(r"^\s*QUEUE\(([^)]+)\)", re.MULTILINE)
+    return [name for name in queue_name_pattern.findall(output) if name != '*']
+
+def display_queues(args):
+    """Display all queues in the specified queue manager."""
+    command = f'echo "DISPLAY QUEUE(*)" | /opt/mqm/bin/runmqsc {args.qm_name}'
+    output = run_command(command)
+    print(output)
+    queue_names = extract_queue_names(output)
+    for queue_name in queue_names:
+        print(queue_name)
+
+def get_queue_permissions(args):
+    """Get permissions for a specific user on all queues in the specified queue manager."""
+    queue_manager = args.qm_name
+    user = args.user
+    command = f'echo "DISPLAY QUEUE(*)" | /opt/mqm/bin/runmqsc {queue_manager}'
+    queues_output = run_command(command)
+    queue_names = extract_queue_names(queues_output)
+
+    for queue_name in queue_names:
+        try:
+            command = f'/opt/mqm/bin/dspmqaut -m {queue_manager} -t q -n "{queue_name}" -p {user}'
+            permissions_output = run_command(command)
+            print(f"Permissions for queue '{queue_name}':\n{permissions_output}\n")
+        except RuntimeError as e:
+            print(f"Error fetching permissions for queue '{queue_name}': {e}")
+
 def main():
     parser = argparse.ArgumentParser(description="IBM MQ Management CLI")
     subparsers = parser.add_subparsers(
@@ -125,6 +157,27 @@ def main():
     Example usage:
     ibm-mq-cli stop_qm QM1
     ibm-mq-cli stop_qm MyQueueManager
+    """
+
+    # Subparser for displaying queues
+    parser_display_queues = subparsers.add_parser("display_queues", help="Display all queues in a queue manager")
+    parser_display_queues.add_argument("qm_name", help="Name of the queue manager")
+    parser_display_queues.set_defaults(func=display_queues)
+    parser_display_queues.epilog = """
+    Example usage:
+    ibm-mq-cli display_queues QM1
+    ibm-mq-cli display_queues MyQueueManager
+    """
+
+    # Subparser for getting queue permissions
+    parser_get_permissions = subparsers.add_parser("get_permissions", help="Get permissions for a user on all queues in a queue manager")
+    parser_get_permissions.add_argument("qm_name", help="Name of the queue manager")
+    parser_get_permissions.add_argument("user", help="Name of the user")
+    parser_get_permissions.set_defaults(func=get_queue_permissions)
+    parser_get_permissions.epilog = """
+    Example usage:
+    ibm-mq-cli get_permissions QM1 myuser
+    ibm-mq-cli get_permissions MyQueueManager anotheruser
     """
 
     args = parser.parse_args()
